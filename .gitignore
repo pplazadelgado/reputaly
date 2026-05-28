@@ -1,0 +1,16 @@
+# .NET
+*.user
+*.suo
+.vs/
+bin/
+obj/
+Reputaly.API/appsettings.json
+Reputaly.API/appsettings.Development.json
+
+# Node
+node_modules/
+reputaly-web/dist/
+
+# Variables de entorno frontend
+reputaly-web/.env.local
+reputaly-web/.env
