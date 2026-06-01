@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<TenantUser> TenantUsers => Set<TenantUser>();
     public DbSet<TenantLocation> TenantLocations => Set<TenantLocation>();
     public DbSet<TenantSettings> TenantSettings => Set<TenantSettings>();
+    public DbSet<Review> Reviews => Set<Review>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,5 +46,27 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<TenantSettings>()
             .HasQueryFilter(s => s.TenantId == _tenantContext.TenantId);
+
+        modelBuilder.Entity<Review>(entity =>
+        {
+            // Índice único sobre GoogleReviewId por ubicación
+            // Evita insertar la misma reseña dos veces si el polling se solapa
+            entity.HasIndex(e => new { e.LocationId, e.GoogleReviewId })
+                  .IsUnique();
+
+            entity.HasOne(e => e.Tenant)
+                  .WithMany()
+                  .HasForeignKey(e => e.TenantId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Location)
+                  .WithMany()
+                  .HasForeignKey(e => e.LocationId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        //Filtro global - todas las consulas de Reviews se filtran por tenant automaticamente
+        modelBuilder.Entity<Review>()
+          .HasQueryFilter(r => r.TenantId == _tenantContext.TenantId);
     }
 }

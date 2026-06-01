@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-
+using Reputaly.API.Infrastructure.Persistence;
 
 #nullable disable
 
@@ -21,6 +21,70 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Reputaly.API.Domain.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AiDecision")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AiDecisionReason")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AiSuggestedReply")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EscalatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FinalReply")
+                        .HasColumnType("text");
+
+                    b.Property<string>("GoogleReviewId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("RepliedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("LocationId", "GoogleReviewId")
+                        .IsUnique();
+
+                    b.ToTable("Reviews");
+                });
 
             modelBuilder.Entity("Reputaly.API.Domain.Tenant", b =>
                 {
@@ -61,6 +125,10 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("GoogleAccessToken")
+                        .HasColumnType("text");
+
+                    b.Property<string>("GoogleAccountEmail")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("GoogleLocationId")
@@ -144,6 +212,25 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("TenantUsers");
+                });
+
+            modelBuilder.Entity("Reputaly.API.Domain.Review", b =>
+                {
+                    b.HasOne("Reputaly.API.Domain.TenantLocation", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Reputaly.API.Domain.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Reputaly.API.Domain.TenantLocation", b =>

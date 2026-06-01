@@ -9,6 +9,7 @@
         public string? GoogleAccessToken {  get; set; }
         public string? GoogleRefreshToken {  get; set; }
         public DateTime? GoogleTokenEspiresAt {  get; set; }
+        public string GoogleAccountEmail {  get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

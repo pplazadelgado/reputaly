@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Reputaly.API.Infrastructure.Multitenancy;
 using Reputaly.API.Infrastructure.Persistence;
+using Reputaly.API.Infrastructure.Services;
+using Microsoft.AspNetCore.DataProtection;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +66,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+// Data Protection (cifrado de tokens OAuth)
+builder.Services.AddDataProtection();
+builder.Services.AddScoped<ITokenEncryptionService, TokenEncryptionService>();
+
+//OAuth state (CSRF protection, en memoria con TTL)
+builder.Services.AddSingleton<IOAuthStateService, OAuthStateService>();
+
+builder.Services.AddHttpClient();
 
 // CORS — debe registrarse ANTES de builder.Build()
 builder.Services.AddCors(options =>
