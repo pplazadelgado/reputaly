@@ -1,0 +1,28 @@
+.content {
+  padding: var(--space-8);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.icon {
+  font-size: 40px;
+}
+
+.heading {
+  font-size: 20px;
+  font-weight: var(--fw-bold);
+  color: var(--slate-900);
+}
+
+.text {
+  font-size: 14px;
+  color: var(--slate-500);
+  max-width: 360px;
+  line-height: 1.6;
+}

@@ -1,13 +1,14 @@
-import { Outlet } from "react-router-dom";
+import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import styles from './AppLayout.module.css';
 
-export default function AppLayout(){
-    return(
-       <div style={{ display: 'flex', minHeight: '100vh' }}>
+export default function AppLayout() {
+  return (
+    <div className={styles.layout}>
       <Sidebar />
-      <main style={{ flex: 1, padding: '32px' }}>
+      <div className={styles.main}>
         <Outlet />
-      </main>
-    </div>   
-    );
+      </div>
+    </div>
+  );
 }

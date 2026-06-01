@@ -1,0 +1,53 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.wrapper.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.circle {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: 50%;
+  background-color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+.circle.checked {
+  border-color: var(--navy-900);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--navy-900);
+}
+
+.nativeInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.nativeInput:focus-visible + .circle {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+.label {
+  font-size: 14px;
+  color: var(--slate-700);
+}

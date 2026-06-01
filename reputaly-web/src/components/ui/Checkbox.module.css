@@ -1,0 +1,53 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.wrapper.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.box {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  background-color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.box.checked {
+  background-color: var(--navy-900);
+  border-color: var(--navy-900);
+}
+
+.checkmark {
+  color: var(--white);
+  display: flex;
+  align-items: center;
+}
+
+.nativeInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.nativeInput:focus-visible + .box {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+.label {
+  font-size: 14px;
+  color: var(--slate-700);
+}

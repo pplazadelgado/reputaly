@@ -1,0 +1,46 @@
+.root {
+  width: 100%;
+}
+
+.header {
+  margin-bottom: var(--space-4);
+}
+
+.chartTitle {
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+  color: var(--slate-900);
+}
+
+.svg {
+  width: 100%;
+  overflow: visible;
+}
+
+.gridLine {
+  stroke: var(--slate-100);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  fill: var(--slate-500);
+  font-size: 11px;
+  font-family: var(--font-ui);
+}
+
+.area {
+  fill: url(#lineGradient);
+  opacity: 0.15;
+}
+
+.line {
+  fill: none;
+  stroke: var(--navy-900);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dot {
+  fill: var(--navy-900);
+}

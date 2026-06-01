@@ -1,0 +1,25 @@
+.track {
+  width: 100%;
+  height: 6px;
+  background-color: var(--slate-100);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+.navy {
+  background-color: var(--navy-900);
+}
+
+.blue {
+  background-color: var(--blue-500);
+}
+
+.green {
+  background-color: var(--green-500);
+}
