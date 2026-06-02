@@ -53,8 +53,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // TenantContext
 builder.Services.AddScoped<ClerkTenantContext>();
 builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<ClerkTenantContext>());
+builder.Services.AddScoped<IReviewIngestionService, ReviewMockService>();
+builder.Services.AddScoped<IReviewDecisionEngine, ReviewDecisionEngine>();
 
-// Autenticación JWT con Clerk
+// Autenticaciï¿½n JWT con Clerk
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -76,7 +78,7 @@ builder.Services.AddSingleton<IOAuthStateService, OAuthStateService>();
 
 builder.Services.AddHttpClient();
 
-// CORS — debe registrarse ANTES de builder.Build()
+// CORS ï¿½ debe registrarse ANTES de builder.Build()
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendDev", policy =>
