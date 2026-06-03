@@ -52,6 +52,7 @@ namespace Reputaly.API.Infrastructure.Services
             if(settings is null)
             {
                 _logger.LogWarning("TenantSettings no encontrado para tenant {TenantId}", review.TenantId);
+                return;
             }
 
             // -------------------------------------------------------
@@ -63,7 +64,7 @@ namespace Reputaly.API.Infrastructure.Services
             {
                 review.AiDecision = "escalate";
                 review.AiDecisionReason = hardRuleEscalation;
-                review.Status = "escalate";
+                review.Status = "escalated";
                 review.EscalatedAt = DateTime.UtcNow;
                 await _db.SaveChangesAsync();
 
@@ -167,7 +168,8 @@ namespace Reputaly.API.Infrastructure.Services
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                _logger.LogError("Error de Claude API: {Error}", error);
+                _logger.LogError("Error de Claude API [{StatusCode}]: {Error}",
+                    (int)response.StatusCode, error);
                 return null;
             }
 
@@ -225,6 +227,12 @@ namespace Reputaly.API.Infrastructure.Services
                     .GetString();
 
                 if (string.IsNullOrEmpty(text)) return null;
+
+                text = text.Trim();
+                if (text.StartsWith("```"))
+                {
+                    text = text.Replace("```json", "").Replace("```", "").Trim();
+                }
 
                 var result = JsonSerializer.Deserialize<AiDecisionResult>(text,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
