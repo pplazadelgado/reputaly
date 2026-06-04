@@ -106,7 +106,7 @@ public class GoogleOAuthController : ControllerBase
         // Guardamos los tokens cifrados en la ubicación
         location.GoogleAccessToken = _encryption.Encrypt(tokenResponse.AccessToken);
         location.GoogleRefreshToken = _encryption.Encrypt(tokenResponse.RefreshToken);
-        location.GoogleTokenEspiresAt = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+        location.GoogleTokenExpiresAt = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
         location.GoogleAccountEmail = tokenResponse.Email ?? string.Empty;
 
         await _db.SaveChangesAsync();

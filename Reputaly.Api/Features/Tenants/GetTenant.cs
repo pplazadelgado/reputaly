@@ -28,7 +28,7 @@ public class GetTenantController : ControllerBase
 
         if (tenant == null) return NotFound();
 
-        return Ok(new TenantDto(tenant.Id, tenant.Name, tenant.SubscriptionPlan, tenant.CreatedAt));
+        return Ok(new TenantDto(tenant.Id, tenant.Name, tenant.Vertical, tenant.SubscriptionPlan, tenant.CreatedAt));
     }
 }
 

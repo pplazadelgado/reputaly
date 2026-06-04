@@ -191,7 +191,9 @@ namespace Reputaly.API.Infrastructure.Services
             Eres el asistente de gestión de reseñas de Google de un negocio.
 
             INFORMACIÓN DEL NEGOCIO:
-            {{settings.AiPersonality}}
+            Instrucciones generales: {{settings.AiConfig.Default.Instructions}}
+            Tono general: {{settings.AiConfig.Default.Tone}}
+            {{(settings.AiConfig.ByRating.TryGetValue(review.Rating.ToString(), out var ratingConfig) ? $"Instrucciones para {review.Rating} estrellas: {ratingConfig.Instructions}" : "")}}
 
             RESEÑA A ANALIZAR:
             - Autor: {{review.AuthorName}}

@@ -29,9 +29,11 @@ public class UpdateSettingsController : ControllerBase
         if (s == null) return NotFound();
 
         s.AutoReplyMinRating = request.AutoReplyMinRating;
-        s.EscalateOnKeywords = request.EscalateOnKeyWords;
+        s.EscalateOnKeywords = request.EscalateOnKeywords;
         s.EscalateIfNoReplyHours = request.EscalateIfNoReplyHours;
-        s.AiPersonality = request.AiPersonality;
+        s.AiConfig = request.AiConfig;
+        s.DefaultResponseLanguage = request.DefaultResponseLanguage;
+        s.AutoDetectLanguage = request.AutoDetectLanguage;
         s.NotificationEmail = request.NotificationEmail;
 
         await _db.SaveChangesAsync();
@@ -40,9 +42,11 @@ public class UpdateSettingsController : ControllerBase
             s.AutoReplyMinRating,
             s.EscalateOnKeywords,
             s.EscalateIfNoReplyHours,
-            s.AiPersonality,
+            s.AiConfig,
+            s.DefaultResponseLanguage,
+            s.AutoDetectLanguage,
             s.NotificationEmail
-            ));
+        ));
     }
 }
 

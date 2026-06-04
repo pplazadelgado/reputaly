@@ -27,10 +27,11 @@ public class UpdateTenatController : ControllerBase
 
         if (tenant == null) return NotFound();
 
-        tenant.Name = request.name;
+        tenant.Name = request.Name;
+        tenant.Vertical = request.Vertical;
         await _db.SaveChangesAsync();
 
-        return Ok(new TenantDto(tenant.Id, tenant.Name, tenant.SubscriptionPlan, tenant.CreatedAt));
+        return Ok(new TenantDto(tenant.Id, tenant.Name, tenant.Vertical, tenant.SubscriptionPlan, tenant.CreatedAt));
     }
 }
 

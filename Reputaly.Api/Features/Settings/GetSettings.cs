@@ -32,9 +32,11 @@ public class GetSettingsController: ControllerBase
             s.AutoReplyMinRating,
             s.EscalateOnKeywords,
             s.EscalateIfNoReplyHours,
-            s.AiPersonality,
+            s.AiConfig,
+            s.DefaultResponseLanguage,
+            s.AutoDetectLanguage,
             s.NotificationEmail
-            ));
+        ));
     }
 }
 

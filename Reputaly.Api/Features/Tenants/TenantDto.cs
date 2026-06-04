@@ -1,12 +1,14 @@
-﻿namespace Reputaly.API.Features.Tenants
-{
-    public record TenantDto(
-        Guid Id,
-        string Name,
-        string SubscriptionPlan,
-        DateTime CreatedAt
-        );
+﻿namespace Reputaly.API.Features.Tenants;
 
-    public record UpdateTenantRequest(string name);
-  
-}
+public record TenantDto(
+    Guid Id,
+    string Name,
+    string? Vertical,
+    string SubscriptionPlan,
+    DateTime CreatedAt
+);
+
+public record UpdateTenantRequest(
+    string Name,
+    string? Vertical
+);

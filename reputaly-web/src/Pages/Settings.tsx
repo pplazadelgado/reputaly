@@ -48,9 +48,10 @@ export default function Settings() {
         setSettings(settingsData);
         setTenantName(tenantData.name);
         setNotificationEmail(settingsData.notificationEmail ?? '');
-        setAiPersonality(settingsData.aiPersonality);
+        setAiPersonality(settingsData.aiConfig?.default?.instructions ?? '');
         setAutoReplyMinRating(settingsData.autoReplyMinRating ?? 4);
         setEscalateOnKeywords(settingsData.escalateOnKeywords ?? []);
+        console.log('keywords cargadas:', settingsData.escalateOnKeywords);
       } catch {
         addToast('Error al cargar los datos de configuración.', 'error');
       } finally {
@@ -65,12 +66,18 @@ export default function Settings() {
     try {
       await updateTenant(tenantName);
       await updateSettings({
-        ...settings!,
-        notificationEmail: notificationEmail || null,
-        aiPersonality,
-        autoReplyMinRating,
-        escalateOnKeywords,
-      });
+      ...settings!,
+      notificationEmail: notificationEmail || null,
+      autoReplyMinRating,
+      escalateOnKeywords,
+      aiConfig: {
+        ...settings!.aiConfig,
+        default: {
+          ...settings!.aiConfig.default,
+          instructions: aiPersonality,
+        },
+  },
+});
       addToast('Cambios guardados correctamente.', 'success');
     } catch {
       addToast('Error al guardar los cambios. Inténtalo de nuevo.', 'error');

@@ -1,18 +1,23 @@
-﻿namespace Reputaly.API.Features.Settings
-{
-    public record SettingsDto(
-        int AutoReplyMinRate,
-        string[] EscalateOnKeyWords,
-        int EscalateIfNoReplyHours,
-        string AiPersonality,
-        string? NotificationEmail
-        );
+﻿using Reputaly.API.Domain;
 
-    public record UpdateSettingsRequest(
-        int AutoReplyMinRating,
-        string[] EscalateOnKeyWords,
-        int EscalateIfNoReplyHours,
-        string AiPersonality,
-        string? NotificationEmail
-        );
-}
+namespace Reputaly.API.Features.Settings;
+
+public record SettingsDto(
+    int AutoReplyMinRating,
+    string[] EscalateOnKeywords,
+    int EscalateIfNoReplyHours,
+    AiConfig AiConfig,
+    string DefaultResponseLanguage,
+    bool AutoDetectLanguage,
+    string? NotificationEmail
+);
+
+public record UpdateSettingsRequest(
+    int AutoReplyMinRating,
+    string[] EscalateOnKeywords,
+    int EscalateIfNoReplyHours,
+    AiConfig AiConfig,
+    string DefaultResponseLanguage,
+    bool AutoDetectLanguage,
+    string? NotificationEmail
+);

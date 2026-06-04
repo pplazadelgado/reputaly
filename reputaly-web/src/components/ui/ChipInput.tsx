@@ -12,18 +12,22 @@ export interface ChipInputProps {
 export function ChipInput({ values, onChange, placeholder = 'Escribe y pulsa Enter…', id }: ChipInputProps) {
   const [input, setInput] = useState('');
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if ((e.key === 'Enter' || e.key === ',') && input.trim()) {
-      e.preventDefault();
-      const next = input.trim();
-      if (!values.includes(next)) {
-        onChange([...values, next]);
-      }
-      setInput('');
-    } else if (e.key === 'Backspace' && !input && values.length > 0) {
-      onChange(values.slice(0, -1));
-    }
+ function commitInput() {
+  const next = input.trim();
+  if (next && !values.includes(next)) {
+    onChange([...values, next]);
   }
+  setInput('');
+}
+
+function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  if ((e.key === 'Enter' || e.key === ',') && input.trim()) {
+    e.preventDefault();
+    commitInput();
+  } else if (e.key === 'Backspace' && !input && values.length > 0) {
+    onChange(values.slice(0, -1));
+  }
+}
 
   function remove(val: string) {
     onChange(values.filter((v) => v !== val));
@@ -50,6 +54,7 @@ export function ChipInput({ values, onChange, placeholder = 'Escribe y pulsa Ent
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
+        onBlur={commitInput}
         placeholder={values.length === 0 ? placeholder : ''}
         aria-label="Añadir palabra clave"
       />

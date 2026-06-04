@@ -50,7 +50,13 @@ public class TenantMiddleware
                 CreatedAt = DateTime.UtcNow
             };
 
-            var settings = new TenantSettings { TenantId = tenant.Id };
+            var settings = new TenantSettings
+            {
+                TenantId = tenant.Id,
+                DefaultResponseLanguage = "es",
+                AutoDetectLanguage = false,
+                AiConfig = new AiConfig()
+            };
 
             db.Tenants.Add(tenant);
             db.TenantSettings.Add(settings);

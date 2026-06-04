@@ -31,13 +31,23 @@ public class AppDbContext : DbContext
             .WithOne(s => s.Tenant)
             .HasForeignKey<TenantSettings>(s => s.TenantId);
 
-        // Array de strings en PostgreSQL (tipo text[])
+        // Array de strings en PostgreSQL
         modelBuilder.Entity<TenantSettings>()
             .Property(s => s.EscalateOnKeywords)
             .HasColumnType("text[]");
 
-        // Filtros globales — se aplican solos en cada consulta
-        // Nota: Tenant NO tiene filtro (es la propia tabla raíz)
+        // AiConfig como jsonb — ValueConverter para serializar/deserializar
+        var aiConfigConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<AiConfig, string>(
+            v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+            v => System.Text.Json.JsonSerializer.Deserialize<AiConfig>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new AiConfig()
+        );
+
+        modelBuilder.Entity<TenantSettings>()
+            .Property(s => s.AiConfig)
+            .HasColumnType("jsonb")
+            .HasConversion(aiConfigConverter);
+
+        // Filtros globales por TenantId
         modelBuilder.Entity<TenantUser>()
             .HasQueryFilter(u => u.TenantId == _tenantContext.TenantId);
 
@@ -46,27 +56,5 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<TenantSettings>()
             .HasQueryFilter(s => s.TenantId == _tenantContext.TenantId);
-
-        modelBuilder.Entity<Review>(entity =>
-        {
-            // Índice único sobre GoogleReviewId por ubicación
-            // Evita insertar la misma reseña dos veces si el polling se solapa
-            entity.HasIndex(e => new { e.LocationId, e.GoogleReviewId })
-                  .IsUnique();
-
-            entity.HasOne(e => e.Tenant)
-                  .WithMany()
-                  .HasForeignKey(e => e.TenantId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(e => e.Location)
-                  .WithMany()
-                  .HasForeignKey(e => e.LocationId)
-                  .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        //Filtro global - todas las consulas de Reviews se filtran por tenant automaticamente
-        modelBuilder.Entity<Review>()
-          .HasQueryFilter(r => r.TenantId == _tenantContext.TenantId);
     }
 }
