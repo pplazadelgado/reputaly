@@ -44,8 +44,8 @@ public class GetReviewsController : ControllerBase
         if(from.HasValue)
             query = query.Where(r => r.PublishedAt >= from.Value);
 
-        if (to.HasValue) 
-            query = query.Where(r => r.PublishedAt >= to.Value);
+        if (to.HasValue)
+            query = query.Where(r => r.PublishedAt <= to.Value);
 
         var total = await query.CountAsync();
 
@@ -57,7 +57,8 @@ public class GetReviewsController : ControllerBase
                 r.Id, r.AuthorName, r.Rating, r.Content,
                 r.PublishedAt, r.Status, r.AiSuggestedReply,
                 r.AiDecision, r.AiDecisionReason, r.FinalReply,
-                r.RepliedAt, r.EscalatedAt, r.CreatedAt, r.LocationId))
+                r.RepliedAt, r.EscalatedAt, r.CreatedAt, r.LocationId,
+                r.DetectedLanguage, r.SentimentScore, r.DetectedTopics, r.AutoReplied))
             .ToListAsync();
 
         return Ok(new

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Reputaly.API.Features.Reviews;
+﻿namespace Reputaly.API.Features.Reviews;
 
 public record ReviewDto(
     Guid Id,
@@ -16,6 +14,10 @@ public record ReviewDto(
     DateTime? RepliedAt,
     DateTime? EscalatedAt,
     DateTime CreatedAt,
-    Guid LocationId
-    );
-
+    Guid LocationId,
+    // Campos nuevos (Modificación 5)
+    string? DetectedLanguage,
+    decimal? SentimentScore,
+    string[]? DetectedTopics,
+    bool AutoReplied
+);

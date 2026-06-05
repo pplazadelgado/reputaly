@@ -26,7 +26,8 @@ public class GetReviewByIdController : ControllerBase
                 r.Id, r.AuthorName, r.Rating, r.Content,
                 r.PublishedAt, r.Status, r.AiSuggestedReply,
                 r.AiDecision, r.AiDecisionReason, r.FinalReply,
-                r.RepliedAt, r.EscalatedAt, r.CreatedAt, r.LocationId))
+                r.RepliedAt, r.EscalatedAt, r.CreatedAt, r.LocationId,
+                r.DetectedLanguage, r.SentimentScore, r.DetectedTopics, r.AutoReplied))
             .FirstOrDefaultAsync();
 
         if (review is null) return NotFound();

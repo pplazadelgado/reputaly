@@ -1,0 +1,265 @@
+.content {
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Filtros */
+.filters {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* Lista */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.reviewRow {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--space-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--radius);
+  transition: background-color 0.15s;
+}
+
+.reviewRow:hover {
+  background-color: var(--slate-50);
+}
+
+.reviewBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.authorName {
+  font-weight: var(--fw-semibold);
+  color: var(--slate-900);
+  font-size: 14px;
+}
+
+.reviewContent {
+  color: var(--slate-700);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reviewMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 12px;
+  color: var(--slate-500);
+}
+
+/* Chips de sentimiento */
+.sentimentChip {
+  font-size: 11px;
+  font-weight: var(--fw-medium);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.sentimentPositive {
+  background-color: var(--green-50);
+  color: var(--green-500);
+}
+
+.sentimentNeutral {
+  background-color: var(--amber-50);
+  color: var(--amber-500);
+}
+
+.sentimentNegative {
+  background-color: var(--red-50);
+  color: var(--red-500);
+}
+
+/* Chips de topic e idioma */
+.topicChip {
+  font-size: 11px;
+  background-color: var(--blue-50);
+  color: var(--blue-500);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-weight: var(--fw-medium);
+}
+
+.langBadge {
+  font-size: 11px;
+  background-color: var(--slate-100);
+  color: var(--slate-700);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.5px;
+}
+
+/* Loading y vacío */
+.loadingText,
+.emptyText {
+  text-align: center;
+  color: var(--slate-500);
+  font-size: 14px;
+  padding: var(--space-8);
+}
+
+/* Paginación */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.pageInfo {
+  font-size: 13px;
+  color: var(--slate-500);
+}
+
+/* ---- Drawer ---- */
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.drawerHeader {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.drawerAuthor {
+  font-size: 16px;
+  font-weight: var(--fw-semibold);
+  color: var(--slate-900);
+  margin: 0;
+}
+
+.drawerRating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.drawerDate {
+  font-size: 12px;
+  color: var(--slate-500);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: var(--fw-semibold);
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.reviewFullText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--slate-900);
+}
+
+/* Análisis IA */
+.analysisGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-4);
+  font-size: 14px;
+}
+
+.analysisLabel {
+  font-weight: var(--fw-medium);
+  color: var(--slate-500);
+  font-size: 13px;
+}
+
+.topicsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.topicChips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Respuestas */
+.aiReply {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--slate-700);
+  background-color: var(--blue-50);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--blue-500);
+}
+
+.finalReply {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--slate-700);
+  background-color: var(--green-50);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--green-500);
+}
+
+.repliedDate {
+  font-size: 12px;
+  color: var(--slate-500);
+}
+
+.replyTextarea {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--slate-900);
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+  outline: none;
+  font-family: var(--font-ui);
+}
+
+.replyTextarea:focus {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}

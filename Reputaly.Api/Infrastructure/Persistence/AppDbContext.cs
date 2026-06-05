@@ -36,6 +36,37 @@ public class AppDbContext : DbContext
             .Property(s => s.EscalateOnKeywords)
             .HasColumnType("text[]");
 
+        // -------------------------------------------------------
+        // Configuración de Review
+        // -------------------------------------------------------
+        modelBuilder.Entity<Review>(entity =>
+        {
+            // Índice único: evita duplicar la misma reseña de Google por ubicación
+            entity.HasIndex(e => new { e.LocationId, e.GoogleReviewId })
+                  .IsUnique();
+
+            // Índice para las queries del panel (tenant + ubicación + estado)
+            entity.HasIndex(e => new { e.TenantId, e.LocationId, e.Status });
+
+            // Topics como array nativo de PostgreSQL
+            entity.Property(e => e.DetectedTopics)
+                  .HasColumnType("text[]");
+
+            entity.HasOne(e => e.Tenant)
+                  .WithMany()
+                  .HasForeignKey(e => e.TenantId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Location)
+                  .WithMany()
+                  .HasForeignKey(e => e.LocationId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Filtro global: todas las queries de Reviews se filtran por tenant
+        modelBuilder.Entity<Review>()
+            .HasQueryFilter(r => r.TenantId == _tenantContext.TenantId);
+
         // AiConfig como jsonb — ValueConverter para serializar/deserializar
         var aiConfigConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<AiConfig, string>(
             v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),

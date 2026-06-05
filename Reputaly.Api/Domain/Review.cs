@@ -23,6 +23,16 @@ public class Review
 
     public DateTime PublishedAt { get; set; }
 
+    public string? DetectedLanguage {  get; set; }
+
+    // Analisis de IA
+    public decimal? SentimentScore {  get; set; }  // -1.0 a 1.0
+                                                   
+    public string[]? DetectedTopics {  get; set; }  // ["precio","trato","limpieza"]
+    public DateTime? AiAnalyzedAt {  get; set; }
+
+
+
     // pending | auto_replied | escalated | replied
     public string Status { get; set; } = "pending";
 
@@ -40,6 +50,9 @@ public class Review
 
     public DateTime? RepliedAt { get; set; }
     public DateTime? EscalatedAt { get; set; }
+
+    // True si la respuesta se publicó automáticamente sin intervención humana
+    public bool AutoReplied { get; set; } = false;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

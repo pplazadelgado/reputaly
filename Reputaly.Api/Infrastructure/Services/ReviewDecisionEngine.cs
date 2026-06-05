@@ -38,6 +38,7 @@ namespace Reputaly.API.Infrastructure.Services
             var review = await _db.Reviews
                 .IgnoreQueryFilters()
                 .Include(r => r.Location)
+                .Include(r => r.Tenant)
                 .FirstOrDefaultAsync(r => r.Id == reviewId);
 
             if(review == null)
@@ -77,9 +78,9 @@ namespace Reputaly.API.Infrastructure.Services
             // -------------------------------------------------------
             // PASO 2: Llamada a Claude API
             // -------------------------------------------------------
-            var aiResult = await CallClaudeAsync(review, settings);
+            var aiResult = await CallClaudeAsync(review, settings, review.Tenant);
 
-            if(aiResult is null)
+            if (aiResult is null)
             {
                 _logger.LogError("Claude no devolvio respuesta para review {ReviewId}", reviewId);
                 return;
@@ -88,14 +89,17 @@ namespace Reputaly.API.Infrastructure.Services
             review.AiSuggestedReply = aiResult.SuggestedReply;
             review.AiDecision = aiResult.Decision;
             review.AiDecisionReason = aiResult.Reason;
+            review.DetectedLanguage = aiResult.DetectedLanguage;
+            review.SentimentScore = aiResult.SentimentScore;
+            review.DetectedTopics = aiResult.Topics;
+            review.AiAnalyzedAt = DateTime.UtcNow;
 
-            if(aiResult.Decision == "auto_reply")
+            if (aiResult.Decision == "auto_reply")
             {
-                // En Fase 2 guardamos la respuesta sugerida
-                // La publicacion real en Google se implementa cuando llegue la aprobacion de la API
                 review.FinalReply = aiResult.SuggestedReply;
                 review.Status = "auto_replied";
                 review.RepliedAt = DateTime.UtcNow;
+                review.AutoReplied = true;
 
                 _logger.LogInformation(
                     "Review {ReviewId} respondida automaticamente por IA", reviewId);
@@ -138,20 +142,22 @@ namespace Reputaly.API.Infrastructure.Services
         // Llamada a Claude API
         // -------------------------------------------------------
         private async Task<AiDecisionResult?> CallClaudeAsync(
-            Review review, TenantSettings settings)
+            Review review, TenantSettings settings, Tenant tenant)
         {
             var apiKey = _config["Anthropic:ApiKey"]!;
-            var model = _config["Anthropic:Model"] ?? "claude-sonnet-4-20250514";
+            var model = _config["Anthropic:Model"] ?? "claude-sonnet-4-5";
 
-            var prompt = BuildPrompt(review, settings);
+            var systemPrompt = BuildSystemPrompt(review, settings, tenant);
+            var userPrompt = BuildUserPrompt(review);
 
-            var requesBody = new
+            var requestBody = new
             {
                 model,
                 max_tokens = 1024,
+                system = systemPrompt,
                 messages = new[]
                 {
-                    new{role = "user", content = prompt}
+                    new { role = "user", content = userPrompt }
                 }
             };
 
@@ -159,8 +165,8 @@ namespace Reputaly.API.Infrastructure.Services
             httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
             httpClient.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
 
-            var json = JsonSerializer.Serialize(requesBody);
-            var content = new StringContent(json,Encoding.UTF8, "application/json");
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await httpClient.PostAsync(
                  "https://api.anthropic.com/v1/messages", content);
@@ -181,37 +187,89 @@ namespace Reputaly.API.Infrastructure.Services
         // Prompt estructurado para Claude
         // -------------------------------------------------------
         // -------------------------------------------------------
-        private string BuildPrompt(Review review, TenantSettings settings)
+        // -------------------------------------------------------
+        // System prompt: rol, restricciones del vertical, config por rating, idioma
+        // -------------------------------------------------------
+        private string BuildSystemPrompt(Review review, TenantSettings settings, Tenant tenant)
         {
-            var reviewText = string.IsNullOrWhiteSpace(review.Content)
-                ? "(El cliente no dejo texto, solo valoracion de estrellas"
-                :review.Content;
+            var sb = new StringBuilder();
 
-            return $$"""
-            Eres el asistente de gestión de reseñas de Google de un negocio.
+            sb.AppendLine("Eres el asistente de gestión de reseñas de Google de un negocio.");
+            sb.AppendLine();
 
-            INFORMACIÓN DEL NEGOCIO:
-            Instrucciones generales: {{settings.AiConfig.Default.Instructions}}
-            Tono general: {{settings.AiConfig.Default.Tone}}
-            {{(settings.AiConfig.ByRating.TryGetValue(review.Rating.ToString(), out var ratingConfig) ? $"Instrucciones para {review.Rating} estrellas: {ratingConfig.Instructions}" : "")}}
+            // --- Modificación 4: hardConstraints del vertical (lo primero, no negociable) ---
+            var vertical = VerticalTemplates.Get(tenant.Vertical);
+            if (vertical is not null && vertical.HardConstraints.Length > 0)
+            {
+                sb.AppendLine("RESTRICCIONES OBLIGATORIAS (no negociables, tienen prioridad absoluta):");
+                foreach (var constraint in vertical.HardConstraints)
+                    sb.AppendLine($"- {constraint}");
+                sb.AppendLine();
+            }
 
-            RESEÑA A ANALIZAR:
-            - Autor: {{review.AuthorName}}
-            - Valoración: {{review.Rating}}/5 estrellas
-            - Texto: {{reviewText}}
+            // --- Modificación 2: config general + específica por rating ---
+            sb.AppendLine("INFORMACIÓN DEL NEGOCIO:");
+            sb.AppendLine($"Instrucciones generales: {settings.AiConfig.Default.Instructions}");
+            sb.AppendLine($"Tono general: {settings.AiConfig.Default.Tone}");
 
-            INSTRUCCIONES:
-            Analiza esta reseña y decide si responder automáticamente o escalarla
-            a un humano. Escala si detectas: situaciones legales, quejas graves
-            que requieren investigación interna, o lenguaje que requiere tacto
-            especial más allá de una respuesta estándar.
+            if (settings.AiConfig.ByRating.TryGetValue(review.Rating.ToString(), out var ratingConfig))
+            {
+                sb.AppendLine($"Instrucciones para {review.Rating} estrellas: {ratingConfig.Instructions}");
+                sb.AppendLine($"Tono para {review.Rating} estrellas: {ratingConfig.Tone}");
+            }
 
-            Responde ÚNICAMENTE con este JSON, sin texto adicional:
+            var maxLength = settings.AiConfig.Default.MaxLength;
+            if (maxLength.HasValue)
+                sb.AppendLine($"Longitud máxima de la respuesta: {maxLength} caracteres.");
+            sb.AppendLine();
+
+            // --- Modificación 3: idioma ---
+            if (settings.AutoDetectLanguage)
+            {
+                sb.AppendLine("IDIOMA: Responde en el mismo idioma en que está escrita la reseña.");
+            }
+            else
+            {
+                // ResponseLanguage de la ubicación tiene prioridad sobre el del tenant
+                var lang = review.Location.ResponseLanguage ?? settings.DefaultResponseLanguage;
+                sb.AppendLine($"IDIOMA: Responde siempre en el idioma con código BCP-47 '{lang}'.");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("""
+            INSTRUCCIONES DE DECISIÓN:
+            Analiza la reseña y decide si responder automáticamente o escalarla a un humano.
+            Escala si detectas: situaciones legales, quejas graves que requieren investigación
+            interna, o lenguaje que requiere tacto especial más allá de una respuesta estándar.
+
+            Responde ÚNICAMENTE con este JSON, sin texto adicional ni markdown:
             {
               "decision": "auto_reply" | "escalate",
               "suggestedReply": "texto de la respuesta (siempre, incluso si escalas)",
-              "reason": "explicación breve de la decisión"
+              "reason": "explicación breve de la decisión",
+              "detectedLanguage": "código BCP-47 del idioma de la reseña (ej. es, en)",
+              "sentimentScore": número entre -1.0 y 1.0,
+              "topics": ["tema1", "tema2"]
             }
+            """);
+
+            return sb.ToString();
+        }
+
+        // -------------------------------------------------------
+        // User prompt: solo los datos concretos de la reseña
+        // -------------------------------------------------------
+        private string BuildUserPrompt(Review review)
+        {
+            var reviewText = string.IsNullOrWhiteSpace(review.Content)
+                ? "(El cliente no dejó texto, solo valoración con estrellas)"
+                : review.Content;
+
+            return $"""
+            RESEÑA A ANALIZAR:
+            - Autor: {review.AuthorName}
+            - Valoración: {review.Rating}/5 estrellas
+            - Texto: {reviewText}
             """;
         }
 
@@ -254,5 +312,8 @@ namespace Reputaly.API.Infrastructure.Services
     internal record AiDecisionResult(
         string Decision,
         string SuggestedReply,
-        string Reason);
+        string Reason,
+        string? DetectedLanguage,
+        decimal? SentimentScore,
+        string[]? Topics);
 }
