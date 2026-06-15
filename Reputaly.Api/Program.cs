@@ -4,8 +4,13 @@ using Microsoft.IdentityModel.Tokens;
 using Reputaly.API.Infrastructure.Multitenancy;
 using Reputaly.API.Infrastructure.Persistence;
 using Reputaly.API.Infrastructure.Services;
+using Reputaly.API.Configuration;
+using Stripe;
 using Microsoft.AspNetCore.DataProtection;
 using System.Threading.RateLimiting;
+using Reputaly.API.Infrastructure.Services.Stripe;
+using Reputaly.API.Infrastructure.Services.Stripe.Billing;
+using Reputaly.API.Infrastructure.Services.Billing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +60,7 @@ builder.Services.AddScoped<ClerkTenantContext>();
 builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<ClerkTenantContext>());
 builder.Services.AddScoped<IReviewIngestionService, ReviewMockService>();
 builder.Services.AddScoped<IReviewDecisionEngine, ReviewDecisionEngine>();
+builder.Services.AddScoped<ISubscriptionLimitsService, SubscriptionLimitsService>();
 
 // Autenticaci�n JWT con Clerk
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -72,6 +78,8 @@ builder.Services.AddAuthorization();
 // Data Protection (cifrado de tokens OAuth)
 builder.Services.AddDataProtection();
 builder.Services.AddScoped<ITokenEncryptionService, TokenEncryptionService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
+builder.Services.AddScoped<IPlanResolver, PlanResolver>();
 
 //OAuth state (CSRF protection, en memoria con TTL)
 builder.Services.AddSingleton<IOAuthStateService, OAuthStateService>();
@@ -88,6 +96,14 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+// Configuración tipada de Stripe (Options pattern)
+builder.Services.Configure<StripeOptions>(
+    builder.Configuration.GetSection(StripeOptions.SectionName));
+
+// Inicializa la API key global de Stripe.net una sola vez al arrancar.
+StripeConfiguration.ApiKey =
+    builder.Configuration["Stripe:SecretKey"];
 
 var app = builder.Build();
 

@@ -37,7 +37,7 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
                     GoogleLocationId = table.Column<string>(type: "text", nullable: true),
                     GoogleAccessToken = table.Column<string>(type: "text", nullable: true),
                     GoogleRefreshToken = table.Column<string>(type: "text", nullable: true),
-                    GoogleTokenEspiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    GoogleTokenExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },

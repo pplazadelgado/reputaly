@@ -1,17 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using Reputaly.API.Infrastructure.Multitenancy;
-
 
 namespace Reputaly.API.Infrastructure.Persistence;
 
-// Esta clase solo la usa el comando "dotnet ef". Nunca se ejecuta en producción.
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string[] args)
     {
+        // Lee la cadena del appsettings.json (y user-secrets si los hubiera),
+        // el mismo sitio que usa la API. Así no hay dos cadenas que mantener.
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddUserSecrets<AppDbContextFactory>(optional: true)
+            .Build();
+
+        var connectionString = config.GetConnectionString("DefaultConnection");
+
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql("Host=ep-delicate-voice-aln65afq-pooler.c-3.eu-central-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_em1MzLT4dfqs;Ssl Mode=Require")
+            .UseNpgsql(connectionString)
             .Options;
 
         return new AppDbContext(options, new MigrationTenantContext());

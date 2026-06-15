@@ -19,17 +19,20 @@ namespace Reputaly.API.Infrastructure.Services
         private readonly IConfiguration _config;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<ReviewDecisionEngine> _logger;
+        private readonly Billing.ISubscriptionLimitsService _limits;
 
         public ReviewDecisionEngine(
             AppDbContext db,
             IConfiguration config,
             IHttpClientFactory httpClientFactory,
-            ILogger<ReviewDecisionEngine> logger)
+            ILogger<ReviewDecisionEngine> logger,
+            Billing.ISubscriptionLimitsService limits)
         {
             _db = db;
             _config = config;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _limits = limits;
         }
 
         public async Task ProcessReviewAsync(Guid reviewId)
@@ -72,6 +75,42 @@ namespace Reputaly.API.Infrastructure.Services
                 _logger.LogInformation(
                     "Review {ReviewId} escalada por regla dura: {Reason}",
                     reviewId, hardRuleEscalation);
+                return;
+            }
+
+            // -------------------------------------------------------
+            // PASO 1.5: Control de límites de suscripción
+            // Antes de gastar quota de Claude, comprobamos que el plan
+            // del tenant permite IA y que le queda cuota este mes.
+            // -------------------------------------------------------
+            var canAutoReply = await _limits.CanAutoReplyAsync(review.TenantId);
+            if (!canAutoReply)
+            {
+                review.AiDecision = "escalate";
+                review.AiDecisionReason = "El plan actual no incluye respuestas con IA";
+                review.Status = "escalated";
+                review.EscalatedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    "Review {ReviewId} escalada: plan sin IA (tenant {TenantId}",
+                    review, review.TenantId);
+                return;
+            }
+
+            var repliesRemaining = await _limits.AiRepliesRemainingAsync(review.TenantId);
+            // - 1 = ilimitado (Pro). 0 = cuota agotada.
+            if(repliesRemaining == 0)
+            {
+                review.AiDecision = "escalate";
+                review.AiDecisionReason = "Limite mensual de respuestas IA alcanzado";
+                review.Status = "escalated";
+                review.EscalatedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    "Review {ReviewId} escalada: cuota IA agotada (tenant {TenantId}",
+                    reviewId, review.TenantId);
                 return;
             }
 
