@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Reputaly.API.Infrastructure;
 using Reputaly.API.Infrastructure.Multitenancy;
 using Reputaly.API.Infrastructure.Services;
 
@@ -21,6 +22,7 @@ public class TrigguerMockIngestionController: ControllerBase
 
     // Solo disponible en Development - no queremos est en produccion
     [Authorize]
+    [DevelopmentOnly]
     [HttpPost("reviews/mock/ingest/{locationId:guid}")]
     public async Task<IActionResult> Handle(Guid locationId)
     {

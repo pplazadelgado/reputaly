@@ -14,6 +14,7 @@ import {useToast} from '../components/ui';
 import apiClient from '../api/apiClient';
 import type { Review, ReviewsPage } from '../types/review';
 import styles from './Reviews.module.css';
+import { replace, useSearchParams } from 'react-router-dom';
 
 // -------------------------------------------------------
 // Helpers
@@ -63,6 +64,7 @@ const RATING_OPTIONS = [
     { value: '1', label: '1 estrella' },
 ];
 
+
 // -------------------------------------------------------
 // Componente principal
 // -------------------------------------------------------
@@ -81,6 +83,7 @@ export default function Reviews() {
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
     const [replyText, setReplyText] = useState('');
     const [sending, setSending] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const { addToast } = useToast();
     const pageSize = 20;
@@ -91,6 +94,27 @@ export default function Reviews() {
     useEffect(() => {
         loadReviews();
     }, [page, statusFilter, ratingFilter]);
+
+    //Si llegamos con ?review={id} abrimos el drawer
+    //de esa reseña concreta, pidiendola al backend por su ID
+    useEffect(() => {
+        const reviewId = searchParams.get('review');
+        if (!reviewId) return;
+
+        async function openReviewFromUrl(id: string) {
+            try {
+                const { data } = await apiClient.get<Review>(`/reviews/${id}`);
+                setSelectedReview(data);
+                setReplyText('');
+            } catch (err) {
+                addToast('No se pudo abrir la reseña indicada.', 'error');
+            } finally {
+                setSearchParams({}, { replace: true });
+            }
+        }
+
+        openReviewFromUrl(reviewId);
+    }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function loadReviews() {
         setLoading(true);

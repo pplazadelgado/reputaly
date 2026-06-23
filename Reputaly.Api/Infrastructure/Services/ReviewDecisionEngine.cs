@@ -3,6 +3,7 @@ using Reputaly.API.Domain;
 using Reputaly.API.Infrastructure.Persistence;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json;
 
@@ -20,19 +21,22 @@ namespace Reputaly.API.Infrastructure.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<ReviewDecisionEngine> _logger;
         private readonly Billing.ISubscriptionLimitsService _limits;
+        private readonly Email.IEmailService _email;
 
         public ReviewDecisionEngine(
             AppDbContext db,
             IConfiguration config,
             IHttpClientFactory httpClientFactory,
             ILogger<ReviewDecisionEngine> logger,
-            Billing.ISubscriptionLimitsService limits)
+            Billing.ISubscriptionLimitsService limits,
+            Email.IEmailService email)
         {
             _db = db;
             _config = config;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
             _limits = limits;
+            _email = email;
         }
 
         public async Task ProcessReviewAsync(Guid reviewId)
@@ -75,6 +79,8 @@ namespace Reputaly.API.Infrastructure.Services
                 _logger.LogInformation(
                     "Review {ReviewId} escalada por regla dura: {Reason}",
                     reviewId, hardRuleEscalation);
+
+                await _email.SendEscalationEmailAsync(review.TenantId, review.Id);
                 return;
             }
 
@@ -153,6 +159,12 @@ namespace Reputaly.API.Infrastructure.Services
             }
 
             await _db.SaveChangesAsync();
+
+            // Email solo si la IA escaló (no si auto-respondió).
+            if (review.Status == "escalated")
+            {
+                await _email.SendEscalationEmailAsync(review.TenantId, review.Id);
+            }
         }
 
         // -------------------------------------------------------

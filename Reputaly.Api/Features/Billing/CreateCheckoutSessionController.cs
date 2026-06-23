@@ -35,7 +35,7 @@ public class CreateCheckoutSessionController : ControllerBase
     public record CheckoutRequest(string Plan); // "stater" | "pro"
 
     [Authorize]
-    [HttpPost("billin/checkout")]
+    [HttpPost("billing/checkout")]
     public async Task<IActionResult> Handle([FromBody] CheckoutRequest request)
     {
         var priceId = _plans.GetPriceId(request.Plan);

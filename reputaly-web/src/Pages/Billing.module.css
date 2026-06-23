@@ -1,0 +1,124 @@
+.content {
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.loadingText {
+  color: var(--slate-500);
+  font-size: 14px;
+}
+
+.currentPlan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.planHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.planLabel {
+  font-size: 14px;
+  color: var(--slate-600);
+}
+
+.planBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  background: var(--navy, #0B2545);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.usageBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.usageLabel {
+  font-size: 13px;
+  color: var(--slate-600);
+}
+
+.usageMeta {
+  font-size: 13px;
+  color: var(--slate-500);
+}
+
+.usageUnlimited {
+  font-size: 14px;
+  color: var(--slate-700);
+}
+
+.renewalInfo {
+  font-size: 13px;
+  color: var(--slate-500);
+}
+
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+.planCardInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+}
+
+.planName {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--slate-900, #0F172A);
+  margin: 0;
+}
+
+.planPrice {
+  font-size: 15px;
+  color: var(--slate-600);
+  margin: 0;
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.featureItem {
+  font-size: 13px;
+  color: var(--slate-700);
+  padding-left: 18px;
+  position: relative;
+}
+
+.featureItem::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--green-600, #16A34A);
+}
+
+.planAction {
+  margin-top: auto;
+}
+
+.manageRow {
+  display: flex;
+  justify-content: flex-end;
+}

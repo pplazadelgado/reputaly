@@ -11,6 +11,8 @@ using System.Threading.RateLimiting;
 using Reputaly.API.Infrastructure.Services.Stripe;
 using Reputaly.API.Infrastructure.Services.Stripe.Billing;
 using Reputaly.API.Infrastructure.Services.Billing;
+using Reputaly.API.Infrastructure.Services.Email;
+using Reputaly.API.Infrastructure.Services.Background;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,12 +57,19 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.Configure<ResendOptions>(builder.Configuration.GetSection(ResendOptions.SectionName));
+
 // TenantContext
 builder.Services.AddScoped<ClerkTenantContext>();
 builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<ClerkTenantContext>());
 builder.Services.AddScoped<IReviewIngestionService, ReviewMockService>();
 builder.Services.AddScoped<IReviewDecisionEngine, ReviewDecisionEngine>();
 builder.Services.AddScoped<ISubscriptionLimitsService, SubscriptionLimitsService>();
+builder.Services.AddScoped<IEmailService, ResendEmailService>();
+
+builder.Services.AddHostedService<WeeklySummaryService>();
+builder.Services.AddHostedService<EscalationTimeoutService>();
+builder.Services.AddScoped<IEscalationTimeoutProcessor, EscalationTimeoutProcessor>();
 
 // Autenticaci�n JWT con Clerk
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

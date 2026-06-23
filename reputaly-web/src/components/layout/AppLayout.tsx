@@ -1,14 +1,17 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import { BillingProvider } from '../../context/BillingContext';
 import styles from './AppLayout.module.css';
 
 export default function AppLayout() {
   return (
-    <div className={styles.layout}>
-      <Sidebar />
-      <div className={styles.main}>
-        <Outlet />
+    <BillingProvider>
+      <div className={styles.layout}>
+        <Sidebar />
+        <div className={styles.main}>
+          <Outlet />
+        </div>
       </div>
-    </div>
+    </BillingProvider>
   );
 }

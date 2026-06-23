@@ -11,6 +11,7 @@ import {
 import { Wordmark } from '../../assets/logo';
 import { ProgressBar } from '../ui';
 import styles from './Sidebar.module.css';
+import { useBilling } from '../../context/BillingContext';
 
 interface NavItem {
   to: string;
@@ -29,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function Sidebar() {
+  const {status} = useBilling();
   return (
     <nav className={styles.sidebar}>
       <div className={styles.header}>
@@ -79,8 +81,24 @@ export default function Sidebar() {
       <div className={styles.footer}>
         <div className={styles.planCard}>
           <div className={styles.planLabel}>Respuestas IA</div>
-          <ProgressBar value={189} max={500} color="navy" />
-          <div className={styles.planMeta}>189 / 500 este mes</div>
+          {status && status.monthlyAiReplies === -1 ? (
+            <div className={styles.planMeta}>
+              {status.aiRepliesUsed} usadas · Ilimitadas
+            </div>
+          ) : status ? (
+            <>
+              <ProgressBar
+                value={status.aiRepliesUsed}
+                max={status.monthlyAiReplies}
+                color="navy"
+              />
+              <div className={styles.planMeta}>
+                {status.aiRepliesUsed} / {status.monthlyAiReplies} este mes
+              </div>
+            </>
+          ) : (
+            <div className={styles.planMeta}>—</div>
+          )}
         </div>
       </div>
     </nav>

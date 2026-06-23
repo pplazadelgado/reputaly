@@ -65,5 +65,12 @@ namespace Reputaly.API.Infrastructure.Services.Stripe
             return list.Data.FirstOrDefault();
 
         }
+
+        public async Task UpdateCustomerNameAsync(string customerId, string name)
+        {
+            var options = new CustomerUpdateOptions { Name = name };
+            var service = new CustomerService();
+            await service.UpdateAsync(customerId, options);
+        }
     }
 }

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
-import { getTenant, updateTenant, getSettings, updateSettings } from '../api/tenantApi';
+import { useState, useEffect,useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { getTenant, updateTenant, getSettings, updateSettings, getLocations } from '../api/tenantApi';
+import type { Location } from '../api/tenantApi';
 import type { Tenant, TenantSettings } from '../types/tenant';
 import TopBar from '../components/layout/TopBar';
-import { Button, Card, Field, Input, Textarea, ChipInput, useToast } from '../components/ui';
+import { Button, Card, Field, Input, Textarea, ChipInput, Select, useToast } from '../components/ui';
 import styles from './Settings.module.css';
 
 type Tab = 'general' | 'ia' | 'notificaciones' | 'google';
@@ -22,6 +24,38 @@ const TONES: { id: Tone; emoji: string; label: string }[] = [
   { id: 'neutro', emoji: '⚖️', label: 'Neutro' },
 ];
 
+const VERTICAL_OPTIONS = [
+  { value: '', label: 'Selecciona un sector...' },
+  // Salud
+  { value: 'clinic', label: 'Clínica médica' },
+  { value: 'dental', label: 'Clínica dental' },
+  { value: 'aesthetics', label: 'Clínica estética' },
+  { value: 'veterinary', label: 'Veterinaria' },
+  { value: 'physio', label: 'Fisioterapia' },
+  { value: 'psychology', label: 'Psicología' },
+  { value: 'pharmacy', label: 'Farmacia / Óptica' },
+  // Educación
+  { value: 'school', label: 'Colegio / Guardería' },
+  // Servicios profesionales
+  { value: 'legal', label: 'Abogados / Gestoría' },
+  { value: 'finance', label: 'Asesoría financiera / Seguros' },
+  // Hostelería y ocio
+  { value: 'restaurant', label: 'Restaurante / Bar' },
+  { value: 'hotel', label: 'Hotel / Alojamiento' },
+  { value: 'gym', label: 'Gimnasio / Fitness' },
+  // Belleza
+  { value: 'beauty', label: 'Peluquería / Belleza' },
+  // Automoción
+  { value: 'garage', label: 'Taller / Automoción' },
+  // Inmobiliario
+  { value: 'realestate', label: 'Inmobiliaria' },
+  // Comercio
+  { value: 'retail', label: 'Tienda / Comercio' },
+  // Genérico
+  { value: 'franchise', label: 'Franquicia' },
+  { value: 'other', label: 'Otros' },
+];
+
 export default function Settings() {
   const { addToast } = useToast();
 
@@ -36,22 +70,30 @@ export default function Settings() {
 
   const [activeTab, setActiveTab] = useState<Tab>('general');
   const [tone, setTone] = useState<Tone>('neutro');
+  const [vertical, setVertical] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [tenantData, settingsData] = await Promise.all([getTenant(), getSettings()]);
+        const [tenantData, settingsData, locationsData] = await Promise.all([
+          getTenant(),
+          getSettings(),
+          getLocations(),
+        ]);
         setTenant(tenantData);
         setSettings(settingsData);
+        setLocations(locationsData);
         setTenantName(tenantData.name);
+        setVertical(tenantData.vertical ?? '');
         setNotificationEmail(settingsData.notificationEmail ?? '');
         setAiPersonality(settingsData.aiConfig?.default?.instructions ?? '');
         setAutoReplyMinRating(settingsData.autoReplyMinRating ?? 4);
         setEscalateOnKeywords(settingsData.escalateOnKeywords ?? []);
-        console.log('keywords cargadas:', settingsData.escalateOnKeywords);
       } catch {
         addToast('Error al cargar los datos de configuración.', 'error');
       } finally {
@@ -61,10 +103,40 @@ export default function Settings() {
     loadData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Detecta retorno del flujo OAuth (el callback redirige a /settings?google=...)
+  useEffect(() => {
+    const googleResult = searchParams.get('google');
+    if (!googleResult) return;
+
+    // Limpiamos el parámetro de la URL para que no se repita el toast
+    setSearchParams({}, { replace: true });
+
+    switch (googleResult) {
+      case 'connected':
+        addToast('Cuenta de Google conectada correctamente.', 'success');
+        setActiveTab('google');
+        // Recargamos ubicaciones para reflejar el nuevo estado
+        getLocations().then(setLocations).catch(() => {});
+        break;
+      case 'denied':
+        addToast('Se denegó el acceso a Google.', 'warning');
+        setActiveTab('google');
+        break;
+      case 'invalid_state':
+        addToast('La sesión de conexión expiró. Inténtalo de nuevo.', 'error');
+        setActiveTab('google');
+        break;
+      case 'token_error':
+        addToast('Error al conectar con Google. Inténtalo de nuevo.', 'error');
+        setActiveTab('google');
+        break;
+    }
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function handleSave() {
     setSaving(true);
     try {
-      await updateTenant(tenantName);
+      await updateTenant(tenantName, vertical || null);
       await updateSettings({
       ...settings!,
       notificationEmail: notificationEmail || null,
@@ -84,6 +156,14 @@ export default function Settings() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleConnectGoogle(locationId: string){
+    // Redirige el navegador al endpoint OAuth del backend.
+    // No es una llamada AJAX: el navegador sale de la SPA,
+    // va a Google, y vuelve al callback del backend.
+    const apiUrl = import.meta.env.VITE_API_URL;
+    window.location.href = `${apiUrl}/oauth/google/initiate/${locationId}`;
   }
 
   if (loading) {
@@ -124,6 +204,16 @@ export default function Settings() {
                     value={tenantName}
                     onChange={(e) => setTenantName(e.target.value)}
                     placeholder="Clínica Dental Ramírez"
+                  />
+                </Field>
+                <Field
+                  label="Sector"
+                  hint="Ajusta el comportamiento de la IA según tu tipo de negocio."
+                >
+                  <Select
+                    options={VERTICAL_OPTIONS}
+                    value={vertical}
+                    onChange={setVertical}
                   />
                 </Field>
               </div>
@@ -241,9 +331,41 @@ export default function Settings() {
         {activeTab === 'google' && (
           <Card>
             <div className={styles.tabContent}>
-              <p className={styles.comingSoonNote}>
-                La conexión con Google Business Profile se configura durante el onboarding. Contacta con soporte si necesitas reconectar tu cuenta.
+              <p className={styles.googleDescription}>
+                Conecta tus ubicaciones con Google Business Profile para monitorizar reseñas y responder automáticamente.
               </p>
+
+              {locations.length === 0 ? (
+                <p className={styles.emptyLocations}>
+                  No hay ubicaciones configuradas. Añade una ubicación para conectar con Google.
+                </p>
+              ) : (
+                <div className={styles.locationList}>
+                  {locations.map((loc) => (
+                    <div key={loc.id} className={styles.locationRow}>
+                      <div className={styles.locationInfo}>
+                        <span className={styles.locationName}>{loc.name}</span>
+                        {loc.isGoogleConnected ? (
+                          <span className={styles.connectedBadge}>
+                            ✓ Conectada — {loc.googleAccountEmail}
+                          </span>
+                        ) : (
+                          <span className={styles.disconnectedBadge}>
+                            Sin conectar
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        variant={loc.isGoogleConnected ? 'ghost' : 'blue'}
+                        size="sm"
+                        onClick={() => handleConnectGoogle(loc.id)}
+                      >
+                        {loc.isGoogleConnected ? 'Reconectar' : 'Conectar con Google'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </Card>
         )}

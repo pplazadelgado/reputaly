@@ -18,5 +18,8 @@ public interface IStripeService
 
     /// <summary>Recupera la suscripción activa del customer (o null si no tiene).</summary>
     Task<Subscription> GetActiveSubscriptionAsync(string customerId);
+
+    /// <summary>Actualiza el nombre de un Customer existente en Stripe.</summary>
+    Task UpdateCustomerNameAsync(string customerId, string name);
 }
 

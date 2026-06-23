@@ -7,6 +7,7 @@ import Settings from '../Pages/Settings';
 import NotFound from '../Pages/NotFound';
 import ComingSoon from '../Pages/ComingSoon';
 import Reviews from '../Pages/Reviews';
+import Billing from '../Pages/Billing';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return (
@@ -36,7 +37,7 @@ export default function AppRouter() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/team" element={<ComingSoon title="Equipo" subtitle="Invita a tu equipo y gestiona permisos." />} />
-          <Route path="/billing" element={<ComingSoon title="Facturación" subtitle="Gestiona tu suscripción y métodos de pago." />} />
+          <Route path="/billing" element={<Billing />} />
           <Route path="/help" element={<ComingSoon title="Ayuda" subtitle="Documentación, tutoriales y soporte." />} />
         </Route>
 

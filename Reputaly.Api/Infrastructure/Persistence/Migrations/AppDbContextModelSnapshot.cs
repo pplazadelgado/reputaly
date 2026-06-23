@@ -98,7 +98,7 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TenantId", "LocationId", "Status");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("Reputaly.API.Domain.Tenant", b =>
@@ -130,7 +130,7 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tenants");
+                    b.ToTable("Tenants", (string)null);
                 });
 
             modelBuilder.Entity("Reputaly.API.Domain.TenantLocation", b =>
@@ -174,7 +174,7 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("TenantLocations");
+                    b.ToTable("TenantLocations", (string)null);
                 });
 
             modelBuilder.Entity("Reputaly.API.Domain.TenantSettings", b =>
@@ -208,7 +208,7 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
 
                     b.HasKey("TenantId");
 
-                    b.ToTable("TenantSettings");
+                    b.ToTable("TenantSettings", (string)null);
                 });
 
             modelBuilder.Entity("Reputaly.API.Domain.TenantUser", b =>
@@ -238,7 +238,7 @@ namespace Reputaly.API.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("TenantUsers");
+                    b.ToTable("TenantUsers", (string)null);
                 });
 
             modelBuilder.Entity("Reputaly.API.Domain.Review", b =>
