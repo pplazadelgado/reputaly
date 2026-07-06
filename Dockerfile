@@ -4,12 +4,12 @@ WORKDIR /src
 
 # Copiamos solo los .csproj primero para cachear el restore de paquetes
 COPY *.sln .
-COPY reputaly.api/*.csproj ./reputaly.api/
+COPY Reputaly.Api/*.csproj ./Reputaly.Api/
 RUN dotnet restore
 
 # Copiamos todo el código y compilamos
 COPY . .
-WORKDIR /src/reputaly.api
+WORKDIR /src/Reputaly.Api
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # Etapa 2: runtime
