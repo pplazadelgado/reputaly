@@ -4,7 +4,7 @@ WORKDIR /src
 
 # Copiamos solo los .csproj primero para cachear el restore de paquetes
 COPY *.sln .
-COPY reputaly.api/*.csproj ./reputaly.Api/
+COPY reputaly.Api/*.csproj ./reputaly.Api/
 RUN dotnet restore
 
 # Copiamos todo el código y compilamos
