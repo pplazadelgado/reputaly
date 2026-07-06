@@ -14,7 +14,7 @@ import {useToast} from '../components/ui';
 import apiClient from '../api/apiClient';
 import type { Review, ReviewsPage } from '../types/review';
 import styles from './Reviews.module.css';
-import { replace, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 // -------------------------------------------------------
 // Helpers

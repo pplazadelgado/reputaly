@@ -1,4 +1,4 @@
-import { useState, useEffect,useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getTenant, updateTenant, getSettings, updateSettings, getLocations } from '../api/tenantApi';
 import type { Location } from '../api/tenantApi';

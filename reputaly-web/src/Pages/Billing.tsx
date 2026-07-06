@@ -1,6 +1,5 @@
 import {useState, useEffect} from 'react';
 import { createCheckoutSession, createBillingPortalSession } from '../api/billingApi';
-import type {BillingStatus} from '../types/billing';
 import TopBar from '../components/layout/TopBar';
 import { Card, ProgressBar, Button, useToast } from '../components/ui';
 import styles from './Billing.module.css';
