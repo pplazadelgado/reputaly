@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'reputaly.api/**'
+      - 'reputaly.Api/**'
       - '.github/workflows/deploy-api.yml'
 
 jobs:
@@ -20,18 +20,18 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restaurar dependencias
-        working-directory: ./reputaly.api
+        working-directory: ./reputaly.Api
         run: dotnet restore
 
       - name: Compilar
-        working-directory: ./reputaly.api
+        working-directory: ./reputaly.Api
         run: dotnet build --no-restore --configuration Release
 
       - name: Instalar herramienta EF Core
         run: dotnet tool install --global dotnet-ef --version 8.*
 
       - name: Aplicar migraciones a producción
-        working-directory: ./reputaly.api
+        working-directory: ./reputaly.Api
         run: dotnet ef database update --connection "${{ secrets.PROD_CONNECTION_STRING }}"
 
       - name: Disparar despliegue en Render
