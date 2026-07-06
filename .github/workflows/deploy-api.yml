@@ -1,0 +1,38 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'reputaly.api/**'
+      - '.github/workflows/deploy-api.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar dependencias
+        working-directory: ./reputaly.api
+        run: dotnet restore
+
+      - name: Compilar
+        working-directory: ./reputaly.api
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Instalar herramienta EF Core
+        run: dotnet tool install --global dotnet-ef --version 8.*
+
+      - name: Aplicar migraciones a producción
+        working-directory: ./reputaly.api
+        run: dotnet ef database update --connection "${{ secrets.PROD_CONNECTION_STRING }}"
+
+      - name: Disparar despliegue en Render
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_API }}"
