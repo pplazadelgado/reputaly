@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { OrganizationSwitcher } from '@clerk/clerk-react';
+import { useOrganization } from '@clerk/clerk-react';
 import {
   LayoutGrid,
   Star,
@@ -17,47 +17,32 @@ interface NavItem {
   to: string;
   icon: React.ReactNode;
   label: string;
-  badge?: number;
+  adminOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard', icon: <LayoutGrid size={18} strokeWidth={1.6} />, label: 'Panel' },
-  { to: '/reviews', icon: <Star size={18} strokeWidth={1.6} />, label: 'Reseñas', badge: 8 },
-  { to: '/settings', icon: <Settings size={18} strokeWidth={1.6} />, label: 'Configuración' },
+  { to: '/reviews', icon: <Star size={18} strokeWidth={1.6} />, label: 'Reseñas' },
+  { to: '/settings', icon: <Settings size={18} strokeWidth={1.6} />, label: 'Configuración', adminOnly: true },
   { to: '/team', icon: <Users size={18} strokeWidth={1.6} />, label: 'Equipo' },
-  { to: '/billing', icon: <CreditCard size={18} strokeWidth={1.6} />, label: 'Facturación' },
+  { to: '/billing', icon: <CreditCard size={18} strokeWidth={1.6} />, label: 'Facturación', adminOnly: true },
   { to: '/help', icon: <HelpCircle size={18} strokeWidth={1.6} />, label: 'Ayuda' },
 ];
 
 export default function Sidebar() {
+  const { membership } = useOrganization();
+  const isAdmin = membership?.role === 'org:admin';
+  const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
   const {status} = useBilling();
+
   return (
     <nav className={styles.sidebar}>
       <div className={styles.header}>
         <Wordmark size={28} />
       </div>
 
-      <div className={styles.orgSwitcher}>
-        <p className={styles.orgLabel}>Negocio</p>
-        <OrganizationSwitcher
-          appearance={{
-            elements: {
-              rootBox: { width: '100%' },
-              organizationSwitcherTrigger: {
-                width: '100%',
-                borderRadius: 'var(--radius)',
-                border: '1px solid var(--slate-200)',
-                padding: '6px 10px',
-                fontSize: '13px',
-                color: 'var(--slate-700)',
-              },
-            },
-          }}
-        />
-      </div>
-
       <div className={styles.nav}>
-        {NAV_ITEMS.map((item) => (
+        {visibleItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
@@ -69,11 +54,6 @@ export default function Sidebar() {
               {item.icon}
             </span>
             {item.label}
-            {item.badge !== undefined && (
-              <span className={styles.badge} aria-label={`${item.badge} pendientes`}>
-                {item.badge}
-              </span>
-            )}
           </NavLink>
         ))}
       </div>

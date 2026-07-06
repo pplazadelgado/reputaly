@@ -27,7 +27,7 @@ public class UpdateTenatController : ControllerBase
         _logger = logger;
     }
 
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     [HttpPut("/tenants/me")]
     public async Task<IActionResult> Handle([FromBody] UpdateTenantRequest request)
     {

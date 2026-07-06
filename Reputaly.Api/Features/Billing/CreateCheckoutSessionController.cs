@@ -34,7 +34,7 @@ public class CreateCheckoutSessionController : ControllerBase
 
     public record CheckoutRequest(string Plan); // "stater" | "pro"
 
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     [HttpPost("billing/checkout")]
     public async Task<IActionResult> Handle([FromBody] CheckoutRequest request)
     {

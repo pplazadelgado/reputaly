@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Reputaly.API.Infrastructure.Multitenancy;
 using Reputaly.API.Infrastructure.Persistence;
-using Reputaly.API.Infrastructure.Persistence;
 
 namespace Reputaly.API.Features.Settings;
 
@@ -19,7 +18,7 @@ public class GetSettingsController: ControllerBase
         _tenant = tenant;
     }
 
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     [HttpGet("/tenants/me/settings")]
     public async Task<IActionResult> Handle()
     {

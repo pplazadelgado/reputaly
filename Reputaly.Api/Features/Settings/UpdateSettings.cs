@@ -19,7 +19,7 @@ public class UpdateSettingsController : ControllerBase
         _tenant = tenant;
     }
 
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     [HttpPut("/tenants/me/settings")]
     public async Task<IActionResult> Handle([FromBody] UpdateSettingsRequest request)
     {

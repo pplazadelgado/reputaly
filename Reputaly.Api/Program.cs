@@ -82,7 +82,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdmin", policy =>
+        policy.RequireClaim("org_role", "org:admin"));
+});
 
 // Data Protection (cifrado de tokens OAuth)
 builder.Services.AddDataProtection();

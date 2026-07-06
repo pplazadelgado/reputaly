@@ -43,7 +43,7 @@ public class GoogleOAuthController : ControllerBase
     // GET /oauth/google/initiate/{locationId}
     // El frontend llama aquí. Redirige al usuario a Google.
     // ---------------------------------------------------------------
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     [HttpGet("/oauth/google/initiate/{locationId:guid}")]
     public IActionResult Initiate(Guid locationId)
     {

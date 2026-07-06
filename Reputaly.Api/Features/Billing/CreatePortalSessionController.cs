@@ -27,7 +27,7 @@ public class CreatePortalSessionController: ControllerBase
         _config = config;
     }
 
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     [HttpPost("billing/portal")]
     public async Task<IActionResult> Handle()
     {

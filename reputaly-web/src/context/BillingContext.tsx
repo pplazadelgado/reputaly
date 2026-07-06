@@ -38,9 +38,22 @@ export function BillingProvider({children}: {children: ReactNode}) {
         }
     }, []);
 
-    // Al montar el Provider (una vez), pedimos el estado.
+    // Al montar el Provider pedimos el estado, y lo refrescamos
+    // periódicamente y al volver a la pestaña, ya que el uso de IA
+    // lo actualiza el backend en segundo plano (no una acción del usuario).
     useEffect(() => {
         refetch();
+
+        const interval = setInterval(refetch, 60_000);
+        const onVisible = () => {
+            if (document.visibilityState === 'visible') refetch();
+        };
+        document.addEventListener('visibilitychange', onVisible);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', onVisible);
+        };
     } , [refetch]);
 
     return (

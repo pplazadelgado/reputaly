@@ -92,6 +92,7 @@ export default function Settings() {
         setVertical(tenantData.vertical ?? '');
         setNotificationEmail(settingsData.notificationEmail ?? '');
         setAiPersonality(settingsData.aiConfig?.default?.instructions ?? '');
+        setTone((settingsData.aiConfig?.default?.tone as Tone) ?? 'neutro');
         setAutoReplyMinRating(settingsData.autoReplyMinRating ?? 4);
         setEscalateOnKeywords(settingsData.escalateOnKeywords ?? []);
       } catch {
@@ -147,6 +148,7 @@ export default function Settings() {
         default: {
           ...settings!.aiConfig.default,
           instructions: aiPersonality,
+          tone,
         },
   },
 });

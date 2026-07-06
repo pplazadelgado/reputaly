@@ -37,7 +37,7 @@ public class GetBillingStatusController : ControllerBase
         DateTime? CurrentPeriodEnd,
         bool CancelAtPeriodEnd);
 
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     [HttpGet("billing/status")]
     public async Task<IActionResult> Handle()
     {
