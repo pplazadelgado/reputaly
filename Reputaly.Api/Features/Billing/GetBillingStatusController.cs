@@ -61,7 +61,7 @@ public class GetBillingStatusController : ControllerBase
         if (!string.IsNullOrEmpty(tenant.StripeCustomerId))
         {
             var sub = await _stripe.GetActiveSubscriptionAsync(tenant.StripeCustomerId);
-            if (sub is not null)
+            if (sub?.Items?.Data is not null)
             {
                 periodEnd = sub.Items.Data.FirstOrDefault()?.CurrentPeriodEnd;
                 cancelAtPeriodEnd = sub.CancelAtPeriodEnd;

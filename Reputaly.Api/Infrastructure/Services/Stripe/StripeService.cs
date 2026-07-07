@@ -58,12 +58,10 @@ namespace Reputaly.API.Infrastructure.Services.Stripe
             var list = await service.ListAsync(new SubscriptionListOptions
             {
                 Customer = customerId,
-                Status = "all",
+                Status = "active",
                 Limit = 1
             });
-
             return list.Data.FirstOrDefault();
-
         }
 
         public async Task UpdateCustomerNameAsync(string customerId, string name)
